@@ -994,6 +994,36 @@ is_qpkg_enabled(){
 }
 
 #####################################################################
+# Append requirements to output message
+#####################################################################
+append_install_msg(){
+	if [ -n "$1" ]; then
+		if $CMD_EXPR "$1" : "QNAP_FW" >/dev/null; then
+			fw_install_msg="${fw_install_msg}${fw_install_msg:+, }$1"
+		elif $CMD_EXPR "$1" : "OPT/.*" >/dev/null; then
+			opt_file=$($CMD_ECHO "$1" | $CMD_SED 's#OPT/\(.*\)#\1#g' )
+			opt_install_msg="${opt_install_msg}${opt_install_msg:+, }$opt_file"
+		else
+			install_msg="${install_msg}${install_msg:+, }$1"
+		fi
+	fi
+}
+append_remove_msg(){
+	if [ -n "$1" ]; then 
+		if $CMD_EXPR "$1" : "QNAP_FW" >/dev/null; then
+			fw_remove_msg="${fw_remove_msg}${fw_remove_msg:+, }$1 $2 $3"
+		elif $CMD_EXPR "$1" : "OPT/.*" >/dev/null; then
+			opt_file=$($CMD_ECHO "$1" | $CMD_SED 's#OPT/\(.*\)#\1#g' )
+			opt_remove_msg="${opt_remove_msg}${opt_remove_msg:+, }$opt_file"
+			[ -n "$2" ] && [ -n "$3" ] && opt_remove_msg="$opt_remove_msg $2 $3"
+		else
+			remove_msg="${remove_msg}${remove_msg:+, }$1"
+			[ -n "$2" ] && [ -n "$3" ] && remove_msg="$remove_msg $2 $3"
+		fi
+	fi
+}
+
+#####################################################################
 # Check requirements routines
 #
 # Only returns if all requirements are fulfilled, otherwise err_log
@@ -1001,8 +1031,10 @@ is_qpkg_enabled(){
 #####################################################################
 check_requirements(){
 	local install_msg=
+	local opt_install_msg=
 	local fw_install_msg=
 	local remove_msg=
+	local opt_remove_msg=
 	local fw_remove_msg=
 	if [ -n "$QPKG_REQUIRE" ]; then
 		OLDIFS="$IFS"; IFS=,
@@ -1041,10 +1073,13 @@ check_requirements(){
 		done
 	fi
 	local err_msg=
+	[ -n "$opt_install_msg" ] || [ -n "$opt_remove_msg" ] && [ -z "$CMD_PKG_TOOL" ] && append_install_msg "Optware | opkg" && opt_remove_msg= && opt_install_msg=
 	[ -n "$fw_install_msg" ] && err_msg="${err_msg}The following firmware requirement must be fulfilled: ${fw_install_msg}. "
 	[ -n "$fw_remove_msg" ] && err_msg="${err_msg}The following firmware conflict must be resolved: ${fw_remove_msg}. "
 	[ -n "$install_msg" ] && err_msg="${err_msg}The following QPKG must be installed and enabled: ${install_msg}. "
 	[ -n "$remove_msg" ] && err_msg="${err_msg}The following QPKG must be removed: ${remove_msg}. "
+	[ -n "$opt_install_msg" ] &&  err_msg="${err_msg}The following Optware package must be installed: ${opt_install_msg}. "
+	[ -n "$opt_remove_msg" ] && err_msg="${err_msg}The following Optware package must be removed: ${opt_remove_msg}. "
 	[ -n "$err_msg" ] && err_log "$err_msg"
 
 	# Package specific routines as defined in package_routines.
@@ -1138,6 +1173,13 @@ add_config_prefix(){
 # Init routine
 ###############
 init(){
+	if [ -x /opt/bin/opkg ]; then
+		CMD_PKG_TOOL="/opt/bin/opkg"
+		SYS_PKG_TOOL_OPTS="--force-maintainer"
+	elif [ -x /opt/bin/ipkg ]; then
+		CMD_PKG_TOOL="/opt/bin/ipkg"
+		SYS_PKG_TOOL_OPTS="-force-defaults"
+	fi
 	if [ -n "$CMD_PKG_TOOL" ] && [ -f $SYS_QPKG_DATA_PACKAGES_FILE ]; then
 		$CMD_ECHO "src/gz _qdk file://$(pwd)" > ipkg.conf
 		SYS_PKG_TOOL_OPTS="$SYS_PKG_TOOL_OPTS -f ipkg.conf"
