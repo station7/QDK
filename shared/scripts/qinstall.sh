@@ -1,7 +1,7 @@
 #!/bin/sh
 ############################################################################
 #
-# $Id: qinstall.sh 358 2011-07-17 08:52:39Z micke $
+# $Id: qinstall.sh 360 2011-07-17 09:34:20Z micke $
 #
 # A QPKG installation script for QDK
 #
@@ -205,25 +205,25 @@ err_log(){
 # Extract data file
 ####################
 extract_data(){
- 	[ -n "$1" ] || return 1
+	[ -n "$1" ] || return 1
 	local archive="$1"
 	local root_dir="${2:-$SYS_QPKG_DIR}"
 	case "$archive" in
-	*.gz|*.bz2)
-		$CMD_TAR xvf "$archive" -C "$root_dir" 2>/dev/null >>$SYS_QPKG_DIR/.list || if [ -x "/usr/local/sbin/notify" ]; then /usr/local/sbin/notify send -A A039 -C C001 -M 35 -l error -t 3 "[{0}] {1} install failed du to data file error." "$PREFIX" "$QPKG_NAME";set_progress_fail;exit 1;else err_log "$SYS_MSG_FILE_ERROR";fi
+		*.gz|*.bz2)
+			$CMD_TAR xvf "$archive" -C "$root_dir" 2>/dev/null >>$SYS_QPKG_DIR/.list || if [ -x "/usr/local/sbin/notify" ]; then /usr/local/sbin/notify send -A A039 -C C001 -M 35 -l error -t 3 "[{0}] {1} install failed du to data file error." "$PREFIX" "$QPKG_NAME";set_progress_fail;exit 1;else err_log "$SYS_MSG_FILE_ERROR";fi
 
-		;;
-	*.7z)
-		$CMD_7Z x -so "$archive" 2>/dev/null | $CMD_TAR xv -C "$root_dir" 2>/dev/null >>$SYS_QPKG_DIR/.list || if [ -x "/usr/local/sbin/notify" ]; then /usr/local/sbin/notify send -A A039 -C C001 -M 35 -l error -t 3 "[{0}] {1} install failed du to data file error." "$PREFIX" "$QPKG_NAME";set_progress_fail;exit 1;else err_log "$SYS_MSG_FILE_ERROR";fi
-		;;
-	*)
-                if [ -x "/usr/local/sbin/notify" ]; then
-                    /usr/local/sbin/notify send -A A039 -C C001 -M 35 -l error -t 3 "[{0}] {1} install failed du to data file error." "$PREFIX" "$QPKG_NAME"
-                    set_progress_fail
-                    exit 1
-                else
-		            err_log "$SYS_MSG_FILE_ERROR"
-                fi
+			;;
+		*.7z)
+			$CMD_7Z x -so "$archive" 2>/dev/null | $CMD_TAR xv -C "$root_dir" 2>/dev/null >>$SYS_QPKG_DIR/.list || if [ -x "/usr/local/sbin/notify" ]; then /usr/local/sbin/notify send -A A039 -C C001 -M 35 -l error -t 3 "[{0}] {1} install failed du to data file error." "$PREFIX" "$QPKG_NAME";set_progress_fail;exit 1;else err_log "$SYS_MSG_FILE_ERROR";fi
+			;;
+		*)
+			if [ -x "/usr/local/sbin/notify" ]; then
+				/usr/local/sbin/notify send -A A039 -C C001 -M 35 -l error -t 3 "[{0}] {1} install failed du to data file error." "$PREFIX" "$QPKG_NAME"
+				set_progress_fail
+				exit 1
+			else
+				err_log "$SYS_MSG_FILE_ERROR"
+			fi
 	esac
 }
 
@@ -266,26 +266,25 @@ store_config(){
 		# Files relative to QPKG directory are changed to full path.
 		[ -z "${file##/*}" ] || file="$SYS_QPKG_DIR/$file"
 		current_md5sum=$($CMD_MD5SUM "$file" 2>/dev/null | $CMD_CUT -d' ' -f1)
-		if [ "$orig_md5sum" = "$current_md5sum" ] ||
-		   [ "$new_md5sum" = "$current_md5sum" ]; then
+		if [ "$orig_md5sum" = "$current_md5sum" ] || [ "$new_md5sum" = "$current_md5sum" ]; then
 			: Use new file
 		elif [ -f $file ]; then
 			if [ -z "$orig_md5sum" ]; then
 				$CMD_MV $file ${file}.qdkorig
-                                if [ -x "/usr/local/sbin/notify" ]; then
-                                    /usr/local/sbin/notify send -A A039 -C C001 -M 38 -l info -t 3 "[{0}] {1} action: {2} is saved as {2}.qdkorig" "$PREFIX" "$QPKG_NAME" "$file"
-                                else
-                                    log "[$PREFIX] $QPKG_NAME saved ${file} as ${file}.qdkorig."
-                                fi
+				if [ -x "/usr/local/sbin/notify" ]; then
+					/usr/local/sbin/notify send -A A039 -C C001 -M 38 -l info -t 3 "[{0}] {1} action: {2} is saved as {2}.qdkorig" "$PREFIX" "$QPKG_NAME" "$file"
+				else
+					log "[$PREFIX] $QPKG_NAME saved ${file} as ${file}.qdkorig."
+				fi
 			elif [ "$orig_md5sum" = "$new_md5sum" ]; then
 				$CMD_TAR rf $SYS_TAR_CONFIG $file 2>/dev/null
 			else
 				$CMD_MV $file ${file}.qdksave
-                                if [ -x "/usr/local/sbin/notify" ]; then
-                                    /usr/local/sbin/notify send -A A039 -C C001 -M 39 -l info -t 3 "[{0}] {1} action: {2} is saved as {2}.qdksave" "$PREFIX" "$QPKG_NAME" "$file"
-                                else
-                                    log "[$PREFIX] $QPKG_NAME saved ${file} as ${file}.qdksave."
-                                fi
+				if [ -x "/usr/local/sbin/notify" ]; then
+					/usr/local/sbin/notify send -A A039 -C C001 -M 39 -l info -t 3 "[{0}] {1} action: {2} is saved as {2}.qdksave" "$PREFIX" "$QPKG_NAME" "$file"
+				else
+					log "[$PREFIX] $QPKG_NAME saved ${file} as ${file}.qdksave."
+				fi
 			fi
 		fi
 	done
@@ -366,34 +365,34 @@ remove_file_and_empty_dir(){
 check_qts_version(){
 	NOW_VERSION=`/sbin/getcfg System Version -f /etc/config/uLinux.conf|cut -c 1,3,5`
 	if [ -e $QTS_MINI_VERSION ]; then
-        	MINI_VERSION=0
-	    else
+		MINI_VERSION=0
+	else
 		MINI_VERSION=`echo "$QTS_MINI_VERSION"|cut -c 1,3,5`
-    	fi
-    	if [ -e $QTS_MAX_VERSION ]; then
-        	MAX_VERSION=1000
-    	else
-        	MAX_VERSION=`echo "$QTS_MAX_VERSION"|cut -c 1,3,5`
-    	fi
+	fi
+	if [ -e $QTS_MAX_VERSION ]; then
+		MAX_VERSION=1000
+	else
+		MAX_VERSION=`echo "$QTS_MAX_VERSION"|cut -c 1,3,5`
+	fi
 
 	if [ ${MINI_VERSION} -gt ${NOW_VERSION} ]; then
-            if [ -x "/usr/local/sbin/notify" ]; then
-                /usr/local/sbin/notify send -A A039 -C C001 -M 40 -l error -t 3 "[{0}] {1} install failed du to the QTS firmware is not compatible, please upgrade QTS to {2} or newer version." "$PREFIX" "$QPKG_NAME" "$QTS_MINI_VERSION"
-                set_progress_fail
-                exit 1
-            else
-                err_log "[$PREFIX] Failed to install $QPKG_NAME. Upgrade QTS to $QTS_MINI_VERSION or a newer compatible version."
-            fi
+		if [ -x "/usr/local/sbin/notify" ]; then
+			/usr/local/sbin/notify send -A A039 -C C001 -M 40 -l error -t 3 "[{0}] {1} install failed du to the QTS firmware is not compatible, please upgrade QTS to {2} or newer version." "$PREFIX" "$QPKG_NAME" "$QTS_MINI_VERSION"
+			set_progress_fail
+			exit 1
+		else
+			err_log "[$PREFIX] Failed to install $QPKG_NAME. Upgrade QTS to $QTS_MINI_VERSION or a newer compatible version."
+		fi
 	elif [ ${MAX_VERSION} -lt ${NOW_VERSION} ]; then
-            if [ -x "/usr/local/sbin/notify" ]; then
-                /usr/local/sbin/notify send -A A039 -C C001 -M 41 -l error -t 3 "[{0}] {1} install failed du to the QTS firmware is not compatible, please downgrade QTS to {2} or newer version." "$PREFIX" "$QPKG_NAME" "$QTS_MAX_VERSION"
-                set_progress_fail
-                exit 1
-            else
-                err_log "[$PREFIX] Failed to install $QPKG_NAME. Downgrade QTS to $QTS_MAX_VERSION or an older compatible version."
-            fi
+		if [ -x "/usr/local/sbin/notify" ]; then
+			/usr/local/sbin/notify send -A A039 -C C001 -M 41 -l error -t 3 "[{0}] {1} install failed du to the QTS firmware is not compatible, please downgrade QTS to {2} or newer version." "$PREFIX" "$QPKG_NAME" "$QTS_MAX_VERSION"
+			set_progress_fail
+			exit 1
+		else
+			err_log "[$PREFIX] Failed to install $QPKG_NAME. Downgrade QTS to $QTS_MAX_VERSION or an older compatible version."
+		fi
 	else
-	    echo "Firmware check is fine."
+		echo "Firmware check is fine."
 	fi
 }
 
@@ -429,7 +428,7 @@ get_share_path(){
 	local share="$1"
 	local path="$2"
 
-	# Get location from smb.conf	
+	# Get location from smb.conf
 	local location=$($CMD_GETCFG "$share" path -f $SYS_CONFIG_DIR/smb.conf)
 
 	[ -n "$location" ] || return 1
@@ -468,27 +467,27 @@ assign_base(){
 #####################################################################
 assign_arch(){
 	case "$(/bin/uname -m)" in
-  		armv5tejl)
-    			SYS_CPU_ARCH="arm-x09"
-    			;;
-  		armv5tel)
-    			SYS_CPU_ARCH="arm-x19"
-   			;;
+		armv5tejl)
+			SYS_CPU_ARCH="arm-x09"
+			;;
+		armv5tel)
+			SYS_CPU_ARCH="arm-x19"
+			;;
 		armv7l)
 			SYS_CPU_ARCH="arm-x41"
 			;;
 		aarch64)
-		        SYS_CPU_ARCH="arm_64"
+			SYS_CPU_ARCH="arm_64"
 			;;
-  		i*86)
-    			SYS_CPU_ARCH="x86"
-    			;;
-  		x86_64)
-    			SYS_CPU_ARCH="x86_64"
-    			;;
-  		*)
-    			SYS_CPU_ARCH=
-    			;;
+		i*86)
+			SYS_CPU_ARCH="x86"
+			;;
+		x86_64)
+			SYS_CPU_ARCH="x86_64"
+			;;
+		*)
+			SYS_CPU_ARCH=
+			;;
 	esac
 }
 
@@ -597,10 +596,10 @@ set_qpkg_volume_select(){
 	fi
 }
 set_qpkg_web_ssl_port(){
-        if [ -n "$QPKG_WEB_SSL_PORT" ]; then
-                set_qpkg_field $SYS_QPKG_CONF_FIELD_WEB_SSL_PORT "$QPKG_WEB_SSL_PORT"
-                [ -n "$QPKG_WEBUI" ] || set_qpkg_field $SYS_QPKG_CONF_FIELD_WEBUI "/"
-        fi
+	if [ -n "$QPKG_WEB_SSL_PORT" ]; then
+		set_qpkg_field $SYS_QPKG_CONF_FIELD_WEB_SSL_PORT "$QPKG_WEB_SSL_PORT"
+		[ -n "$QPKG_WEBUI" ] || set_qpkg_field $SYS_QPKG_CONF_FIELD_WEBUI "/"
+	fi
 }
 set_qpkg_status(){
 	if [ "$SYS_QPKG_SERVICE_ENABLED" = "TRUE" ]; then
@@ -782,10 +781,10 @@ is_less_or_equal(){
 
 	if $CMD_EXPR $MAJOR \> $REQ_MAJOR >/dev/null ||
 	   (($CMD_EXPR $MAJOR = $REQ_MAJOR >/dev/null) &&
-	    $CMD_EXPR $MINOR \> $REQ_MINOR >/dev/null) ||
+		$CMD_EXPR $MINOR \> $REQ_MINOR >/dev/null) ||
 	   (($CMD_EXPR $MAJOR = $REQ_MAJOR >/dev/null) &&
-	    ($CMD_EXPR $MINOR = $REQ_MINOR >/dev/null) &&
-	    $CMD_EXPR $BUILD \> $REQ_BUILD >/dev/null); then
+		($CMD_EXPR $MINOR = $REQ_MINOR >/dev/null) &&
+		$CMD_EXPR $BUILD \> $REQ_BUILD >/dev/null); then
 		return 1
 	fi
 }
@@ -804,10 +803,10 @@ is_less(){
 
 	if $CMD_EXPR $MAJOR \> $REQ_MAJOR >/dev/null ||
 	   (($CMD_EXPR $MAJOR = $REQ_MAJOR >/dev/null) &&
-	    $CMD_EXPR $MINOR \> $REQ_MINOR >/dev/null) ||
+		$CMD_EXPR $MINOR \> $REQ_MINOR >/dev/null) ||
 	   (($CMD_EXPR $MAJOR = $REQ_MAJOR >/dev/null) &&
-	    ($CMD_EXPR $MINOR = $REQ_MINOR >/dev/null) &&
-	    $CMD_EXPR $BUILD \>= $REQ_BUILD >/dev/null); then
+		($CMD_EXPR $MINOR = $REQ_MINOR >/dev/null) &&
+		$CMD_EXPR $BUILD \>= $REQ_BUILD >/dev/null); then
 		return 1
 	fi
 }
@@ -826,10 +825,10 @@ is_greater(){
 
 	if $CMD_EXPR $MAJOR \< $REQ_MAJOR >/dev/null ||
 	   (($CMD_EXPR $MAJOR = $REQ_MAJOR >/dev/null) &&
-	    $CMD_EXPR $MINOR \< $REQ_MINOR >/dev/null) ||
+		$CMD_EXPR $MINOR \< $REQ_MINOR >/dev/null) ||
 	   (($CMD_EXPR $MAJOR = $REQ_MAJOR >/dev/null) &&
-	    ($CMD_EXPR $MINOR = $REQ_MINOR >/dev/null) &&
-	    $CMD_EXPR $BUILD \<= $REQ_BUILD >/dev/null); then
+		($CMD_EXPR $MINOR = $REQ_MINOR >/dev/null) &&
+		$CMD_EXPR $BUILD \<= $REQ_BUILD >/dev/null); then
 		return 1
 	fi
 }
@@ -848,10 +847,10 @@ is_greater_or_equal(){
 
 	if $CMD_EXPR $MAJOR \< $REQ_MAJOR >/dev/null ||
 	   (($CMD_EXPR $MAJOR = $REQ_MAJOR >/dev/null) &&
-	    $CMD_EXPR $MINOR \< $REQ_MINOR >/dev/null) ||
+		$CMD_EXPR $MINOR \< $REQ_MINOR >/dev/null) ||
 	   (($CMD_EXPR $MAJOR = $REQ_MAJOR >/dev/null) &&
-	    ($CMD_EXPR $MINOR = $REQ_MINOR >/dev/null) &&
-	    $CMD_EXPR $BUILD \< $REQ_BUILD >/dev/null); then
+		($CMD_EXPR $MINOR = $REQ_MINOR >/dev/null) &&
+		$CMD_EXPR $BUILD \< $REQ_BUILD >/dev/null); then
 		return 1
 	fi
 }
@@ -895,21 +894,21 @@ is_qpkg_not_installed(){
 
 		if [ -n "$conflict" ] && [ -n "$installed" ]; then
 			case "$op" in
-			=|==)
-				is_equal $installed $conflict || status=0 ;;
-			!=)
-				is_unequal $installed $conflict || status=0 ;;
-			\<=)
-				is_less_or_equal $installed $conflict || status=0 ;;
-			\<)
-				is_less $installed $conflict || status=0 ;;
-			\>)
-				is_greater $installed $conflict || status=0 ;;
-			\>=)
-				is_greater_or_equal $installed $conflict || status=0 ;;
-			*)
-				status=1
-				;;
+				=|==)
+					is_equal $installed $conflict || status=0 ;;
+				!=)
+					is_unequal $installed $conflict || status=0 ;;
+				\<=)
+					is_less_or_equal $installed $conflict || status=0 ;;
+				\<)
+					is_less $installed $conflict || status=0 ;;
+				\>)
+					is_greater $installed $conflict || status=0 ;;
+				\>=)
+					is_greater_or_equal $installed $conflict || status=0 ;;
+				*)
+					status=1
+					;;
 			esac
 		fi
 	else
@@ -959,21 +958,21 @@ is_qpkg_enabled(){
 		fi
 		if [ -n "$required" ] && [ -n "$installed" ]; then
 			case "$op" in
-			=|==)
-				is_equal $installed $required || status=1 ;;
-			!=)
-				is_unequal $installed $required || status=1 ;;
-			\<=)
-				is_less_or_equal $installed $required || status=1 ;;
-			\<)
-				is_less $installed $required || status=1 ;;
-			\>)
-				is_greater $installed $required || status=1 ;;
-			\>=)
-				is_greater_or_equal $installed $required || status=1 ;;
-			*)
-				status=1
-				;;
+				=|==)
+					is_equal $installed $required || status=1 ;;
+				!=)
+					is_unequal $installed $required || status=1 ;;
+				\<=)
+					is_less_or_equal $installed $required || status=1 ;;
+				\<)
+					is_less $installed $required || status=1 ;;
+				\>)
+					is_greater $installed $required || status=1 ;;
+				\>=)
+					is_greater_or_equal $installed $required || status=1 ;;
+				*)
+					status=1
+					;;
 			esac
 		fi
 	fi
@@ -1055,7 +1054,7 @@ check_requirements(){
 				statusOK="TRUE"
 				is_qpkg_enabled "$qpkg" $op $version && break
 				statusOK="FALSE"
-			done 
+			done
 			[ "$statusOK" = "TRUE" ] || if [ -x "/usr/local/sbin/notify" ]; then /usr/local/sbin/notify send -A A039 -C C001 -M 44 -l error -t 3 "[{0}] {1} {2} install failed. The following QPKG must be installed and enabled: {3}." "$PREFIX" "$QPKG_NAME" "$QPKG_VER" "$QPKG_REQUIRE"; set_progress_fail;exit 1;else err_log "[$PREFIX] Failed to install $QPKG_NAME $QPKG_VER. You must first install and enable $QPKG_REQUIRE.";fi
 		done
 	fi
@@ -1069,7 +1068,7 @@ check_requirements(){
 			qpkg=$1
 			op=$2
 			version=$3
-			is_qpkg_not_installed "$qpkg" $op $version || if [ -x "/usr/local/sbin/notify" ]; then /usr/local/sbin/notify send -A A039 -C C001 -M 45 -l error -t 3 "[{0}] {1} {2} install failed. The following QPKG must be removed: {3}." "$PREFIX" "$QPKG_NAME" "$QPKG_VER" "$QPKG_CONFLICT";set_progress_fail;exit 1;else err_log "[$PREFIX] Failed to install $QPKG_NAME $QPKG_VER. You must first remove $QPKG_CONFLICT.";fi 
+			is_qpkg_not_installed "$qpkg" $op $version || if [ -x "/usr/local/sbin/notify" ]; then /usr/local/sbin/notify send -A A039 -C C001 -M 45 -l error -t 3 "[{0}] {1} {2} install failed. The following QPKG must be removed: {3}." "$PREFIX" "$QPKG_NAME" "$QPKG_VER" "$QPKG_CONFLICT";set_progress_fail;exit 1;else err_log "[$PREFIX] Failed to install $QPKG_NAME $QPKG_VER. You must first remove $QPKG_CONFLICT.";fi
 		done
 	fi
 	local err_msg=
@@ -1114,34 +1113,33 @@ create_uninstall_script(){
 	exec > "$uninstall_script"
 
 	$CMD_CAT <<-EOF
-	#!/bin/sh
+#!/bin/sh
 
-	# Stop the service before we begin the removal.
-	if [ -x $SYS_INIT_DIR/$QPKG_SERVICE_PROGRAM ]; then
-		$SYS_INIT_DIR/$QPKG_SERVICE_PROGRAM stop
-		$CMD_SLEEP 5
-		$CMD_SYNC
-	fi
+# Stop the service before we begin the removal.
+if [ -x $SYS_INIT_DIR/$QPKG_SERVICE_PROGRAM ]; then
+	$SYS_INIT_DIR/$QPKG_SERVICE_PROGRAM stop
+	$CMD_SLEEP 5
+	$CMD_SYNC
+fi
 
-	# Package specific routines as defined in package_routines.
-	$PKG_PRE_REMOVE
+# Package specific routines as defined in package_routines.
+$PKG_PRE_REMOVE
 
-	# Remove QPKG directory, init-scripts, and icons.
-	$CMD_RM -fr "$SYS_QPKG_DIR"
-	$CMD_RM -f "$SYS_INIT_DIR/$QPKG_SERVICE_PROGRAM"
-	$CMD_FIND $SYS_STARTUP_DIR -type l -name 'QS*${QPKG_NAME}' | $CMD_XARGS $CMD_RM -f 
-	$CMD_FIND $SYS_SHUTDOWN_DIR -type l -name 'QK*${QPKG_NAME}' | $CMD_XARGS $CMD_RM -f
-	$CMD_RM -f "$SYS_RSS_IMG_DIR/${QPKG_NAME}.gif"
-	$CMD_RM -f "$SYS_RSS_IMG_DIR/${QPKG_NAME}_80.gif"
-	$CMD_RM -f "$SYS_RSS_IMG_DIR/${QPKG_NAME}_gray.gif"
+# Remove QPKG directory, init-scripts, and icons.
+$CMD_RM -fr "$SYS_QPKG_DIR"
+$CMD_RM -f "$SYS_INIT_DIR/$QPKG_SERVICE_PROGRAM"
+$CMD_FIND $SYS_STARTUP_DIR -type l -name 'QS*${QPKG_NAME}' | $CMD_XARGS $CMD_RM -f
+$CMD_FIND $SYS_SHUTDOWN_DIR -type l -name 'QK*${QPKG_NAME}' | $CMD_XARGS $CMD_RM -f
+$CMD_RM -f "$SYS_RSS_IMG_DIR/${QPKG_NAME}.gif"
+$CMD_RM -f "$SYS_RSS_IMG_DIR/${QPKG_NAME}_80.gif"
+$CMD_RM -f "$SYS_RSS_IMG_DIR/${QPKG_NAME}_gray.gif"
 
-	# Package specific routines as defined in package_routines.
-	$PKG_MAIN_REMOVE
+# Package specific routines as defined in package_routines.
+$PKG_MAIN_REMOVE
 
-	# Package specific routines as defined in package_routines.
-	$PKG_POST_REMOVE
-
-	EOF
+# Package specific routines as defined in package_routines.
+$PKG_POST_REMOVE
+EOF
 
 	# Restore stdout and close fd 5.
 	exec 1>&5 5>&-
@@ -1212,6 +1210,7 @@ pre_install(){
 		local current_qpkg_ver="$($CMD_GETCFG $QPKG_NAME $SYS_QPKG_CONF_FIELD_VERSION -f $SYS_QPKG_CONFIG_FILE)"
 		$CMD_ECHO "$QPKG_NAME $current_qpkg_ver is already installed. Setup will now perform package upgrading."
 	fi
+
 	check_qts_version
 	store_config
 	store_built_version
@@ -1222,7 +1221,7 @@ pre_install(){
 	$CMD_MKDIR -p $SYS_QPKG_DIR
 
 	# Package specific routines as defined in package_routines.
-	call_defined_routine pkg_pre_install 
+	call_defined_routine pkg_pre_install
 }
 
 ##################################
@@ -1241,7 +1240,6 @@ install(){
 # Post-install routine
 ##################################
 post_install(){
-	
 	remove_obsolete_files
 	copy_qpkg_icons
 	link_start_stop_script
@@ -1265,13 +1263,13 @@ main(){
 	elif [ -f $SYS_QPKG_DATA_FILE_7ZIP ]; then
 		SYS_QPKG_DATA_FILE=$SYS_QPKG_DATA_FILE_7ZIP
 	else
-            if [ -x "/usr/local/sbin/notify" ]; then
-                /usr/local/sbin/notify send -A A039 -C C001 -M 34 -l error -t 3 "[{0}] {1} install failed du to cannot find the data file." "$PREFIX" "$QPKG_NAME"
-                set_progress_fail
-                exit 1
-            else
-                err_log "[$PREFIX] Failed to install $QPKG_NAME. Data file is missing."
-            fi
+		if [ -x "/usr/local/sbin/notify" ]; then
+			/usr/local/sbin/notify send -A A039 -C C001 -M 34 -l error -t 3 "[{0}] {1} install failed du to cannot find the data file." "$PREFIX" "$QPKG_NAME"
+			set_progress_fail
+			exit 1
+		else
+			err_log "[$PREFIX] Failed to install $QPKG_NAME. Data file is missing."
+		fi
 	fi
 
 	init
@@ -1289,20 +1287,20 @@ main(){
 
 	$CMD_SYNC
 
-	##system pop up log when QPKG has installed 
+	##system pop up log when QPKG has installed
 
 	if [ -n "$QPKG_DISPLAY_NAME" ]; then
-            if [ -x "/usr/local/sbin/notify" ]; then
-                /usr/local/sbin/notify send -A A039 -C C001 -M 46 -l info -t 3 "[{0}] {1} {2} has been installed in {3} successfully." "$PREFIX" "$QPKG_DISPLAY_NAME" "$QPKG_VER" "$SYS_QPKG_DIR"
-            else
-                log "[$PREFIX] Installed $QPKG_DISPLAY_NAME $QPKG_VER in $SYS_QPKG_DIR."
-            fi
+		if [ -x "/usr/local/sbin/notify" ]; then
+			/usr/local/sbin/notify send -A A039 -C C001 -M 46 -l info -t 3 "[{0}] {1} {2} has been installed in {3} successfully." "$PREFIX" "$QPKG_DISPLAY_NAME" "$QPKG_VER" "$SYS_QPKG_DIR"
+		else
+			log "[$PREFIX] Installed $QPKG_DISPLAY_NAME $QPKG_VER in $SYS_QPKG_DIR."
+		fi
 	else
-            if [ -x "/usr/local/sbin/notify" ]; then
-                /usr/local/sbin/notify send -A A039 -C C001 -M 46 -l info -t 3 "[{0}] {1} {2} has been installed in {3} successfully." "$PREFIX" "$QPKG_NAME" "$QPKG_VER" "$SYS_QPKG_DIR"
-            else
-                log "[$PREFIX] Installed $QPKG_NAME $QPKG_VER in $SYS_QPKG_DIR."
-            fi
+		if [ -x "/usr/local/sbin/notify" ]; then
+			/usr/local/sbin/notify send -A A039 -C C001 -M 46 -l info -t 3 "[{0}] {1} {2} has been installed in {3} successfully." "$PREFIX" "$QPKG_NAME" "$QPKG_VER" "$SYS_QPKG_DIR"
+		else
+			log "[$PREFIX] Installed $QPKG_NAME $QPKG_VER in $SYS_QPKG_DIR."
+		fi
 	fi
 
 	# This also starts the service program if the QPKG is enabled.
@@ -1310,20 +1308,22 @@ main(){
 
 	##system pop up log after QPKG has installed and app was enable
 
-	if [ -n "$QPKG_DISPLAY_NAME" ]; then
-            if [ -x "/usr/local/sbin/notify" ]; then
-                /usr/local/sbin/notify send -A A039 -C C001 -M 47 -l info -t 3 "[{0}] {1} enabled." "$PREFIX" "$QPKG_DISPLAY_NAME"
-            else
-                log "[$PREFIX] Enabled $QPKG_DISPLAY_NAME."
-            fi
-	else
-            if [ -x "/usr/local/sbin/notify" ]; then
-                /usr/local/sbin/notify send -A A039 -C C001 -M 47 -l info -t 3 "[{0}] {1} enabled." "$PREFIX" "$QPKG_NAME"
-            else
-                log "[$PREFIX] Enabled $QPKG_NAME."
-            fi
+	if is_qpkg_enabled "$QPKG_NAME"; then
+		if [ -n "$QPKG_DISPLAY_NAME" ]; then
+			if [ -x "/usr/local/sbin/notify" ]; then
+				/usr/local/sbin/notify send -A A039 -C C001 -M 47 -l info -t 3 "[{0}] {1} enabled." "$PREFIX" "$QPKG_DISPLAY_NAME"
+			else
+				log "[$PREFIX] Enabled $QPKG_DISPLAY_NAME."
+			fi
+		else
+			if [ -x "/usr/local/sbin/notify" ]; then
+				/usr/local/sbin/notify send -A A039 -C C001 -M 47 -l info -t 3 "[{0}] {1} enabled." "$PREFIX" "$QPKG_NAME"
+			else
+				log "[$PREFIX] Enabled $QPKG_NAME."
+			fi
+		fi
 	fi
 	set_progress_end
-	}
+}
 
 main
