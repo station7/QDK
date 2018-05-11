@@ -1,9 +1,10 @@
 # QDK
-The project is fork qnap SDK 2.2.4
 
-# QDK Download Link:
+The project is a fork of https://github.com/qnap-dev/QDK
 
-https://download.qnap.com/QPKG/QDK/QDK_2.3.1.zip
+From v 2.3.0 onwards, the original QDK removed the requirement check for Optware packages. This fork re-introduces the requirement check for Optware packages and installs any missing Optware 
+packages via opkg as prior versions of the QDK did. Optware is no longer support by QNAP, but Entware fills the gap. Since Entware provides the packages via opkg as well, is works fine with the 
+version of the QDK.
 
 # QPKG Development Guidelines
 ----------------------------------
