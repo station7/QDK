@@ -38,11 +38,19 @@ The value must be a full path or a path relative to $QDK_ROOT_DIR. The icons sha
   
 https://github.com/fcwu/docker-qdk2
 
+# How to install QDK in Ubuntu
+
+sudo ./InstallToUbuntu.sh install
+
 # QDK Quick Start Guide
 
 https://www.gitbook.com/book/edhongcy/qdk-quick-start-guide/details
 
 # Update new feature
+
+2.3.2
+
+        -Support Ubuntu.
 
 2.3.1
 
