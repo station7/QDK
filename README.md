@@ -18,7 +18,7 @@ https://download.qnap.com/QPKG/QDK/QDK_2.3.2.zip
 
 QDK is used to build QPKG files/applications for QNAP Turbo NAS. A QPKG file makes it easy for anyone to install and remove packages. It also gives a package maintainer almost total control on how the package is installed on the NAS.
 The major design goal of QDK is to make it easy for the package maintainer to create simple QPKG files and at the same time also support more advanced packages. QDK started out as a simple modification of the first official release of the QPKG SDK, but now supersedes it. It includes many new features like architecture check at installation, support for digital signatures, different compression algorithms, a comprehensive option to check that other required QPKG packages are installed (or that conflicting packages are not installed), and a powerful build script.
-#### Form QTS 4.2.0 on, no support Optware.
+#### From QTS 4.2.0 on, no support of Optware.
 
 # License
 
