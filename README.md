@@ -6,6 +6,11 @@ From v 2.3.0 onwards, the original QDK removed the requirement check for Optware
 packages via opkg as prior versions of the QDK did. Optware is no longer support by QNAP, but Entware fills the gap. Since Entware provides the packages via opkg as well, is works fine with the 
 version of the QDK.
 
+# Original QDK Download Link:
+
+https://download.qnap.com/QPKG/QDK/QDK_2.3.2.zip
+
+
 # QPKG Development Guidelines
 ----------------------------------
 
@@ -51,6 +56,7 @@ https://www.gitbook.com/book/edhongcy/qdk-quick-start-guide/details
 2.3.2
 
         -Support Ubuntu.
+        -Fixed notification log.
 
 2.3.1
 

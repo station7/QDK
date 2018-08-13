@@ -597,7 +597,7 @@ add_qpkg_header(){
 	# Return value 10 to remove QPKG package after installation
 	local retval=10
 	local extract_dir="/mnt/HDA_ROOT/update_pkg/tmp"
-	local wrong_arch="[$PREFIX] Failed to install $QPKG_NAME $QPKG_VER. Installation package is incompatible. Use the correct package."
+	local wrong_arch="[$PREFIX] Failed to install $QPKG_DISPLAY_NAME $QPKG_VER. Installation package is incompatible. Use the correct package."
 	local log_tool="/sbin/log_tool -t2 -uSystem -p127.0.0.1 -mlocalhost -a"
 
 	local cpu_arch=
@@ -677,11 +677,12 @@ add_qpkg_header(){
 				QPKG_DIR="\${QINSTALL_PATH}/\${QPKG_NAME}"
 			else
 				if [ -x "/usr/local/sbin/notify" ]; then
-					/usr/local/sbin/notify send -A A039 -C C001 -M 50 -l error -t 3 "[{0}] {1} install failed due to QTS application install volume not found." "$PREFIX" "$QPKG_NAME"
+					/usr/local/sbin/notify send -A A039 -C C001 -M 50 -l error -t 3 "[{0}] {1} install failed due to QTS application install volume not found." "$PREFIX" "$QPKG_DISPLAY_NAME"
 					set_progress_fail
 					exit 
 				else
-					$log_tool "[$PREFIX] Failed to install $QPKG_NAME. The selected installation volume is missing."
+					$log_tool "[$PREFIX] Failed to install $QPKG_DISPLAY_NAME. The selected installation volume is missing."
+					set_progress_fail
 				fi
 				exit
 			fi
@@ -689,11 +690,12 @@ add_qpkg_header(){
 		return 0
 	else
 		if [ -x "/usr/local/sbin/notify" ]; then
-			/usr/local/sbin/notify send -A A039 -C C001 -M 50 -l error -t 3 "[{0}] {1} install failed due to QTS application install volume not found." "$PREFIX" "$QPKG_NAME"
+			/usr/local/sbin/notify send -A A039 -C C001 -M 50 -l error -t 3 "[{0}] {1} install failed due to QTS application install volume not found." "$PREFIX" "$QPKG_DISPLAY_NAME"
 			set_progress_fail
 			exit 
 		else
-			$log_tool "[$PREFIX] Failed to install $QPKG_NAME. The selected installation volume is missing."
+			$log_tool "[$PREFIX] Failed to install $QPKG_DISPLAY_NAME. The selected installation volume is missing."
+			set_progress_fail
 		fi
 		exit
 	fi
@@ -704,14 +706,15 @@ add_qpkg_header(){
 		/bin/cat >>$QDK_QPKG_FILE <<-EOF
 		wrong_arch(){
 			if [ -x "/usr/local/sbin/notify" ]; then
-				/usr/local/sbin/notify send -A A039 -C C001 -M 51 -l error -t 3 "[{0}] {1} {2} install failed due to the platform is imcompatable. Please use correct package for installation." "$PREFIX" "$QPKG_NAME" "$QPKG_VER"
+				/usr/local/sbin/notify send -A A039 -C C001 -M 51 -l error -t 3 "[{0}] {1} {2} install failed due to the platform is imcompatable. Please use correct package for installation." "$PREFIX" "$QPKG_DISPLAY_NAME" "$QPKG_VER"
 				set_progress_fail
 				exit 
 			else
 				local wrong_arch_msg="$wrong_arch"
 				echo "Installation Abort." && echo "\$wrong_arch_msg"
-				$log_tool "[$PREFIX] Failed to install "$QPKG_NAME" $QPKG_VER. Installation package is incompatible. Use the correct package."
-				echo -1 > /tmp/update_process && exit 1
+				$log_tool "[$PREFIX] Failed to install $QPKG_DISPLAY_NAME $QPKG_VER. Installation package is incompatible. Use the correct package."
+				set_progress_fail
+				echo -1 > /tmp/update_process && exit 
 			fi
 		}
 		arch_ok(){
@@ -886,7 +889,12 @@ add_qpkg_tail(){
 
 # Add encryption.
 add_qpkg_encryption(){
-	verbose_msg "Adding QPKG checksum: $(/sbin/qpkg --encrypt $QDK_QPKG_FILE)"
+	if [ -x "/sbin/qpkg" ]; then
+		verbose_msg "Adding QPKG checksum: $(/sbin/qpkg --encrypt $QDK_QPKG_FILE)"
+	else
+		verbose_msg "Adding QPKG checksum: $QDK_QPKG_FILE"
+		qpkg_encrypt $QDK_QPKG_FILE
+	fi
 }
 
 create_qpkg(){
@@ -920,7 +928,7 @@ create_qpkg(){
 	add_qpkg_content
 	add_qpkg_signature
 	add_qpkg_tail
-	#add_qpkg_encryption
+	add_qpkg_encryption
 
 	debug_msg "Copying $QDK_QPKG_FILE to $QDK_BUILD_DIR"
 	/bin/cp -fp $QDK_QPKG_FILE $QDK_BUILD_DIR
@@ -934,7 +942,9 @@ create_qpkg(){
 build(){
 	local arch="$1"
 	local arch_dir="$2"
-
+	if [ -z "$QPKG_DISPLAY_NAME" ]; then
+		QPKG_DISPLAY_NAME=$QPKG_NAME
+	fi
 	/bin/mkdir -m 755 tmp.$$ || err_msg "failed to create directory for tar archives"
 
 	if [ -f "$QDK_DATA_FILE" ]; then
