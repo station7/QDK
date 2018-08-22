@@ -8,7 +8,7 @@ version of the QDK.
 
 # Original QDK Download Link:
 
-https://download.qnap.com/QPKG/QDK/QDK_2.3.2.zip
+https://download.qnap.com/QPKG/QDK/QDK_2.3.3.zip
 
 
 # QPKG Development Guidelines
@@ -47,29 +47,37 @@ https://github.com/fcwu/docker-qdk2
 
 sudo ./InstallToUbuntu.sh install
 
+https://github.com/qnap-dev/qdk2/releases/download/v0.22/qdk2_0.22.trusty_amd64.deb
+
+https://github.com/qnap-dev/qdk2/releases/download/v0.22/qdk2_0.22.xenial_amd64.deb
+
 # QDK Quick Start Guide
 
 https://www.gitbook.com/book/edhongcy/qdk-quick-start-guide/details
 
 # Update new feature
 
+2.3.3
+
+    -Fixed install failed but app center show disable icon.
+
 2.3.2
 
-        -Support Ubuntu.
-        -Fixed notification log.
+    -Support Ubuntu.
+    -Fixed notification log.
 
 2.3.1
 
-        -Change Notification level.
+    -Change Notification level.
 
 2.3.0
 
-        -Support Notification Center.
-        -Modify the info log error log and warning log description.
+    -Support Notification Center.
+    -Modify the info log error log and warning log description.
 
 2.2.16
 
-        -Add new platform arm_64.
+    -Add new platform arm_64.
 
 2.2.15
 	

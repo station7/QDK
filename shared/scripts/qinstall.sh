@@ -554,11 +554,7 @@ disable_qpkg(){
 }
 set_qpkg_name(){
 	set_qpkg_field $SYS_QPKG_CONF_FIELD_NAME "$QPKG_NAME"
-	if [ -z "$QPKG_DISPLAY_NAME" ]; then
-		QPKG_DISPLAY_NAME=$QPKG_NAME
-	else
-	   	set_qpkg_field $SYS_QPKG_CONF_FIELD_DISPLAY_NAME "$QPKG_DISPLAY_NAME"
-	fi
+   	set_qpkg_field $SYS_QPKG_CONF_FIELD_DISPLAY_NAME "$QPKG_DISPLAY_NAME"
 }
 set_qpkg_version(){
 	set_qpkg_field $SYS_QPKG_CONF_FIELD_VERSION "$QPKG_VER"
@@ -1273,7 +1269,9 @@ post_install(){
 ##################################
 main(){
 	set_progress_begin
-
+	if [ -z "$QPKG_DISPLAY_NAME" ]; then
+		QPKG_DISPLAY_NAME=$QPKG_NAME
+	fi
 	if [ -f $SYS_QPKG_DATA_FILE_GZIP ]; then
 		SYS_QPKG_DATA_FILE=$SYS_QPKG_DATA_FILE_GZIP
 	elif [ -f $SYS_QPKG_DATA_FILE_BZIP2 ]; then
